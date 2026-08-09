@@ -1,0 +1,1018 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>世界一カンタンなAI社員の作り方｜保存版資料</title>
+<meta name="description" content="Claude CodeとDiscordで、スマホから話しかけると働くAI社員をゼロから作るための保存版資料。動画で使ったプロンプトを全部そのまま掲載しています。">
+<meta property="og:title" content="世界一カンタンなAI社員の作り方｜保存版資料">
+<meta property="og:description" content="Claude CodeとDiscordでAI社員をゼロから作るための保存版資料。動画で使ったプロンプトを全部掲載。">
+<meta property="og:image" content="assets/ogp.png">
+<meta name="theme-color" content="#0b2a5b">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=M+PLUS+1:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   保存版資料テンプレート v2 — 青ベース / 動きあり / GitHub Pages配布用
+   使い方: 各コンポーネントは <!-- [C:名前] --> で始まる。
+           使わないブロックはコメントごと削除してよい。
+   ============================================================ */
+
+:root{
+  /* --- 色（青ベース。紫・ピンクは使わない） --- */
+  --ink:#0a1020;          /* 本文 */
+  --ink-soft:#22304a;     /* 見出し補助 */
+  --muted:#5c6880;        /* 補足文 */
+  --navy:#0b2a5b;         /* 濃紺 */
+  --blue:#0866ff;         /* 主役の青 */
+  --blue-dark:#073b9a;
+  --cyan:#28d3ff;         /* 差し色 */
+  --sky:#d9eaff;
+  --blue-soft:#eef5ff;
+  --line:#d8e4f6;
+  --bg:#f6f9ff;
+  --white:#fff;
+  --code-bg:#0b1834;      /* プロンプト枠 */
+  --ok:#0f9d58;
+  --warn:#f59e0b;
+  --grad-hero:linear-gradient(135deg,#040c22 0%,#062a68 48%,#0a63d6 100%);
+  --grad-accent:linear-gradient(135deg,var(--cyan) 0%,var(--blue) 100%);
+  --shadow:0 18px 44px rgba(8,32,80,.12);
+  --shadow-hover:0 26px 64px rgba(8,32,80,.22);
+  --radius:18px;
+  --radius-sm:12px;
+  --max:1040px;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;overflow-x:hidden;scroll-padding-top:24px}
+body{
+  margin:0;color:var(--ink);background:var(--bg);
+  font-family:'Noto Sans JP',-apple-system,BlinkMacSystemFont,'Hiragino Sans',Meiryo,sans-serif;
+  line-height:1.95;font-size:16px;overflow-x:hidden;
+  background-image:
+    radial-gradient(circle at 12% -4%,rgba(8,102,255,.10),transparent 34%),
+    radial-gradient(circle at 92% 6%,rgba(40,211,255,.10),transparent 30%);
+  background-attachment:fixed;
+}
+a{color:var(--blue);font-weight:700;text-underline-offset:3px;text-decoration-thickness:2px}
+img{max-width:100%;height:auto;display:block}
+
+/* [C:進捗バー] ページ上端のスクロール進捗 */
+.progress{position:fixed;inset:0 0 auto 0;height:4px;z-index:60;background:transparent}
+.progress span{display:block;height:100%;width:0;background:var(--grad-accent);box-shadow:0 0 14px rgba(8,102,255,.6);transition:width .1s linear}
+
+.page{width:min(var(--max),calc(100vw - 32px));margin:0 auto;padding:28px 0 96px}
+
+/* ============ [C:ヒーロー] ============ */
+.hero{position:relative;overflow:hidden;border-radius:26px;color:#fff;padding:clamp(30px,5vw,64px);background:var(--grad-hero);box-shadow:var(--shadow-hover)}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(135deg,rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(45deg,rgba(255,255,255,.05) 1px,transparent 1px);
+  background-size:74px 74px;opacity:.6}
+.hero::after{content:"";position:absolute;width:280px;height:280px;right:-90px;top:-110px;border-radius:50%;
+  background:radial-gradient(circle,rgba(40,211,255,.35),transparent 70%);animation:float 7s ease-in-out infinite;pointer-events:none}
+.hero-inner{position:relative;z-index:1}
+.hero-glow{position:absolute;inset:-40%;z-index:0;pointer-events:none;opacity:.5;
+  background:radial-gradient(320px circle at var(--mx,50%) var(--my,50%),rgba(120,190,255,.30),transparent 60%);transition:opacity .4s ease}
+@keyframes float{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-14px,0)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+
+.badge{display:inline-flex;align-items:center;gap:8px;padding:7px 16px;border-radius:999px;
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);
+  font-size:12px;font-weight:800;letter-spacing:.1em}
+.badge .dot{width:8px;height:8px;border-radius:50%;background:#4ade80;animation:blink 1.8s ease-in-out infinite}
+.hero h1{margin:18px 0 14px;font-family:'M PLUS 1',sans-serif;font-size:clamp(27px,5.4vw,52px);line-height:1.28;font-weight:800;letter-spacing:-.01em}
+.hero h1 .grad{background:linear-gradient(135deg,#8fd6ff,#fff 60%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero .lead{margin:0;font-size:clamp(14px,2.2vw,17px);opacity:.94;max-width:44em}
+.hero-meta{margin-top:16px;font-size:13px;opacity:.8}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+.hero-figure{margin-top:28px;border-radius:18px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),0 16px 40px rgba(0,0,0,.42)}
+.hero-stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.hero-stat{flex:1 1 150px;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16)}
+.hero-stat b{display:block;font-family:'M PLUS 1',sans-serif;font-size:clamp(20px,3.4vw,28px);line-height:1.3}
+.hero-stat span{font-size:12px;opacity:.82}
+
+/* ============ [C:ボタン] ============ */
+.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:13px 24px;
+  overflow:hidden;border-radius:14px;background:var(--grad-accent);color:#fff!important;font-weight:900;text-decoration:none;
+  box-shadow:0 12px 30px rgba(8,102,255,.34);transition:transform .26s ease,box-shadow .26s ease}
+.btn::before{content:"";position:absolute;inset:0;transform:translateX(-130%);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.38),transparent);transition:transform .6s ease}
+.btn:hover{transform:translateY(-3px);box-shadow:0 18px 42px rgba(8,102,255,.46)}
+.btn:hover::before{transform:translateX(130%)}
+.btn.ghost{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);box-shadow:none}
+.btn.solid{background:var(--navy);box-shadow:0 12px 30px rgba(11,42,91,.28)}
+.btn.small{min-height:40px;padding:9px 16px;font-size:13px;border-radius:11px;box-shadow:var(--shadow)}
+/* [C:ツールリンク] 本文中に置く小さめリンクボタン。章末に集約せず、話題が出た章の中に置く */
+.toollink{display:inline-flex;align-items:center;gap:7px;margin:4px 8px 4px 0;padding:8px 14px;border-radius:999px;
+  background:var(--white);border:1px solid var(--line);color:var(--blue)!important;font-size:13.5px;font-weight:800;
+  text-decoration:none;box-shadow:0 6px 16px rgba(8,32,80,.07);transition:transform .2s ease,border-color .2s ease}
+.toollink:hover{transform:translateY(-2px);border-color:var(--blue)}
+.toollink::after{content:"↗";font-size:11px;opacity:.7}
+
+/* ============ [C:目次] ============ */
+.toc{margin:30px 0 0;padding:24px 26px;border-radius:var(--radius);background:var(--white);border:1px solid var(--line);box-shadow:var(--shadow)}
+.toc h2{margin:0 0 14px;font-family:'M PLUS 1',sans-serif;font-size:17px;color:var(--navy)}
+.toc ol{margin:0;padding-left:0;list-style:none;counter-reset:toc;display:grid;gap:6px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.toc li{counter-increment:toc}
+.toc a{display:flex;gap:10px;align-items:baseline;padding:8px 10px;border-radius:10px;color:var(--ink-soft)!important;
+  font-weight:700;font-size:14.5px;text-decoration:none;transition:background .2s ease,color .2s ease}
+.toc a::before{content:counter(toc,decimal-leading-zero);color:var(--blue);font-family:'M PLUS 1',sans-serif;font-size:13px}
+.toc a:hover,.toc a.active{background:var(--blue-soft);color:var(--navy)!important}
+
+/* [C:サイド進捗ナビ] PCのみ。現在地を点で示す */
+.sidenav{position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:40;display:none;flex-direction:column;gap:11px}
+.sidenav a{position:relative;width:11px;height:11px;border-radius:50%;background:var(--line);transition:background .25s ease,transform .25s ease}
+.sidenav a.active{background:var(--blue);transform:scale(1.45)}
+.sidenav a span{position:absolute;right:20px;top:50%;transform:translateY(-50%) translateX(6px);white-space:nowrap;
+  padding:5px 10px;border-radius:8px;background:var(--navy);color:#fff;font-size:11.5px;font-weight:700;
+  opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease}
+.sidenav a:hover span{opacity:1;transform:translateY(-50%) translateX(0)}
+@media (min-width:1240px){.sidenav{display:flex}}
+
+/* ============ [C:セクション見出し] ============ */
+.sec{margin-top:56px}
+.sec-label{margin:0;text-align:center;font-family:'M PLUS 1',sans-serif;font-size:12.5px;letter-spacing:.16em;color:var(--blue);font-weight:800}
+.sec-title{margin:6px 0 6px;text-align:center;font-family:'M PLUS 1',sans-serif;font-size:clamp(21px,4.4vw,31px);line-height:1.42;color:var(--navy);font-weight:800}
+.sec-lead{margin:0 auto;max-width:36em;text-align:center;font-size:14.5px;color:var(--muted)}
+
+/* ============ [C:本文カード] ============ */
+.card{margin-top:22px;padding:clamp(20px,3.4vw,32px);border-radius:var(--radius);background:var(--white);
+  border:1px solid var(--line);box-shadow:var(--shadow);transition:transform .3s ease,box-shadow .3s ease}
+.card:hover{box-shadow:var(--shadow-hover)}
+.card h3{margin:26px 0 10px;font-family:'M PLUS 1',sans-serif;font-size:clamp(17px,2.8vw,21px);color:var(--navy);line-height:1.5}
+.card h3:first-child{margin-top:0}
+.card p{margin:0 0 12px}
+.card p:last-child{margin-bottom:0}
+.hl{background:linear-gradient(transparent 62%,rgba(8,102,255,.22) 62%);font-weight:800}
+
+/* [C:3Dホバーカード] グリッド内の小カードだけ軽く反応させる */
+.tilt{transform-style:preserve-3d;transition:transform .3s ease}
+
+/* ============ [C:手順ステップ] 番号つき縦並び ============ */
+.step{display:flex;gap:16px;padding:20px 0;border-top:1px dashed var(--line)}
+.step:first-of-type{border-top:0;padding-top:4px}
+.step-no{flex:0 0 42px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:12px;
+  background:var(--grad-accent);color:#fff;font-family:'M PLUS 1',sans-serif;font-weight:800;font-size:17px;
+  box-shadow:0 8px 20px rgba(8,102,255,.28)}
+.step-body{flex:1;min-width:0}
+.step-body h4{margin:6px 0 8px;font-family:'M PLUS 1',sans-serif;font-size:16.5px;color:var(--navy);line-height:1.55}
+.step-body p{margin:0 0 10px;font-size:15px}
+
+/* ============ [C:グリッドカード] 3つ並べる用 ============ */
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-top:6px}
+.grid-item{padding:20px;border-radius:var(--radius-sm);background:var(--blue-soft);border:1px solid var(--line)}
+.grid-item .tag{display:inline-block;margin-bottom:8px;padding:3px 11px;border-radius:999px;background:var(--navy);color:#fff;font-size:11.5px;font-weight:800}
+.grid-item h4{margin:0 0 7px;font-family:'M PLUS 1',sans-serif;font-size:16px;color:var(--navy);line-height:1.5}
+.grid-item p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+/* ============ [C:要点リスト] ============ */
+.takeaway{margin:0;padding:0;list-style:none;counter-reset:tk}
+.takeaway li{counter-increment:tk;position:relative;padding:14px 0 14px 46px;border-bottom:1px dashed var(--line)}
+.takeaway li:last-child{border-bottom:0}
+.takeaway li::before{content:counter(tk);position:absolute;left:0;top:14px;width:30px;height:30px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;background:var(--navy);color:#fff;font-size:14px;font-weight:800}
+.takeaway b{display:block;color:var(--navy);font-size:16px;line-height:1.6}
+.takeaway span{display:block;margin-top:5px;font-size:14.5px;color:var(--ink-soft)}
+
+/* [C:チェックリスト] */
+.check{margin:0;padding:0;list-style:none}
+.check li{position:relative;padding:9px 0 9px 32px;font-size:15px}
+.check li::before{content:"";position:absolute;left:4px;top:17px;width:14px;height:8px;border-left:3px solid var(--blue);border-bottom:3px solid var(--blue);transform:rotate(-45deg)}
+
+/* ============ [C:プロンプト枠] コピーボタン付き ============ */
+.prompt{position:relative;margin:18px 0;border-radius:var(--radius-sm);background:var(--code-bg);
+  box-shadow:0 16px 38px rgba(4,20,54,.32);overflow:hidden}
+.prompt-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 16px;
+  background:rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.09)}
+.prompt-head b{color:#cfe4ff;font-size:12.5px;font-weight:800;letter-spacing:.04em}
+.copy{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:0;border-radius:9px;cursor:pointer;
+  background:var(--blue);color:#fff;font-size:12px;font-weight:800;font-family:inherit;transition:background .2s ease,transform .2s ease}
+.copy:hover{transform:translateY(-1px)}
+.copy.done{background:var(--ok)}
+.prompt pre{margin:0;padding:18px 18px 20px;overflow-x:auto;color:#e6f0ff;font-size:13.5px;line-height:1.85;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Noto Sans JP',monospace;white-space:pre-wrap;word-break:break-word}
+
+/* ============ [C:画像] 生成画像・スクショを本文に挟む ============ */
+.figure{margin:22px 0;border-radius:var(--radius-sm);overflow:hidden;background:var(--white);border:1px solid var(--line);box-shadow:var(--shadow)}
+.figure img{width:100%}
+.figure figcaption{padding:12px 16px;font-size:13px;color:var(--muted);background:var(--blue-soft);border-top:1px solid var(--line)}
+
+/* ============ [C:動画] 16:9で埋め込む ============ */
+.video{margin:20px 0 0;border-radius:var(--radius-sm);overflow:hidden;background:#050d1f;aspect-ratio:16/9;box-shadow:var(--shadow)}
+.video iframe,.video video{width:100%;height:100%;border:0;display:block}
+.video-note{margin:12px 0 0;font-size:13.5px;color:var(--muted)}
+
+/* ============ [C:表] 横スクロール対応 ============ */
+.table-scroll{margin:18px 0;overflow-x:auto;border-radius:var(--radius-sm);border:1px solid var(--line);background:var(--white)}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:14.5px}
+th,td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--navy);color:#fff;font-weight:800;white-space:nowrap}
+tbody tr:nth-child(even){background:var(--blue-soft)}
+tbody tr:last-child td{border-bottom:0}
+
+/* ============ [C:補足ボックス] ============ */
+.note{margin:16px 0;padding:14px 18px;border-radius:var(--radius-sm);background:var(--blue-soft);border-left:4px solid var(--blue);font-size:14px;color:var(--ink-soft)}
+.note.warn{background:#fff8ec;border-left-color:var(--warn)}
+.note b{color:var(--navy)}
+.example{margin:12px 0;padding:14px 18px;border-radius:var(--radius-sm);background:#f4f8ff;border:1px dashed var(--blue);font-size:14px}
+
+/* ============ [C:締めCTA] ============ */
+.closing{margin-top:64px;padding:clamp(30px,5vw,52px);border-radius:26px;color:#fff;text-align:center;
+  background:var(--grad-hero);box-shadow:var(--shadow-hover);position:relative;overflow:hidden}
+.closing::after{content:"";position:absolute;width:340px;height:340px;left:-120px;bottom:-160px;border-radius:50%;
+  background:radial-gradient(circle,rgba(40,211,255,.28),transparent 70%);animation:float 8s ease-in-out infinite}
+.closing-inner{position:relative;z-index:1}
+.closing h2{margin:0 0 12px;font-family:'M PLUS 1',sans-serif;font-size:clamp(20px,4vw,30px);line-height:1.45}
+.closing p{margin:0 auto 10px;max-width:38em;font-size:15px;opacity:.94}
+.closing .btn{margin-top:20px}
+.bonus{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));margin:24px 0 4px;text-align:left}
+.bonus div{padding:14px 16px;border-radius:13px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18)}
+.bonus b{display:block;font-family:'M PLUS 1',sans-serif;font-size:19px}
+.bonus span{font-size:12.5px;opacity:.85}
+
+.foot{margin-top:34px;text-align:center;font-size:12.5px;color:var(--muted)}
+
+/* [C:トップへ戻る] */
+.totop{position:fixed;right:20px;bottom:22px;z-index:50;width:48px;height:48px;border:0;border-radius:50%;cursor:pointer;
+  background:var(--navy);color:#fff;font-size:19px;box-shadow:var(--shadow);opacity:0;pointer-events:none;
+  transition:opacity .3s ease,transform .3s ease}
+.totop.show{opacity:1;pointer-events:auto}
+.totop:hover{transform:translateY(-3px)}
+
+/* ============ [C:出現アニメーション] ============ */
+.rv{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
+.rv.in{opacity:1;transform:none}
+
+@media (max-width:640px){
+  body{font-size:15.5px;line-height:1.9}
+  .step{gap:12px}
+  .step-no{flex-basis:36px;height:36px;font-size:15px}
+  .totop{right:14px;bottom:14px;width:44px;height:44px}
+}
+
+/* 動きが苦手な閲覧者には動きを止める */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .rv{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<!-- [C:進捗バー] -->
+<div class="progress"><span id="bar"></span></div>
+
+<nav class="sidenav" id="sidenav" aria-label="セクション">
+  <a href="#s1"><span>AI社員とは</span></a>
+  <a href="#s2"><span>準備するもの</span></a>
+  <a href="#s3"><span>セットアップ</span></a>
+  <a href="#s4"><span>棚卸し</span></a>
+  <a href="#s5"><span>スキル化</span></a>
+  <a href="#s6"><span>オートメーション</span></a>
+  <a href="#s7"><span>安全設定</span></a>
+  <a href="#s8"><span>つまずいた時</span></a>
+</nav>
+
+<div class="page">
+
+  <header class="hero" id="hero">
+    <div class="hero-glow" id="glow"></div>
+    <div class="hero-inner">
+      <span class="badge"><span class="dot"></span>保存版資料｜動画の手順とプロンプト全部入り</span>
+      <h1>世界一カンタンな<br><span class="grad">AI社員の作り方</span></h1>
+      <p class="lead">今回は動画のご視聴と、保存版資料のお受け取りをいただきありがとうございます。この資料では、動画でお話しした内容と、実際に手を動かすための手順・プロンプトをすべてまとめています。上から順番に進めれば、あなたのAI社員がDiscordの中で働きはじめます。</p>
+
+      <div class="hero-stats">
+        <div class="hero-stat"><b>4ステップ</b><span>セットアップ → 棚卸し → スキル化 → オートメーション</span></div>
+        <div class="hero-stat"><b>0円</b><span>仕組み自体の追加料金（Claudeの有料プランのみ）</span></div>
+        <div class="hero-stat"><b>コピペだけ</b><span>設定はプロンプトを貼ってAIに任せる</span></div>
+      </div>
+
+      <div class="hero-cta">
+        <a class="btn" href="#s1">資料を読みはじめる →</a>
+      </div>
+
+      <div class="hero-figure">
+        <img src="assets/hero.png" alt="スマホのチャットから話しかけると、家のパソコンの中のAI社員が働いてくれる仕組みのイラスト" width="1920" height="1080" fetchpriority="high">
+      </div>
+
+      <p class="hero-meta">※ このページはブックマークして、作業しながら見返してください。</p>
+    </div>
+  </header>
+
+  <nav class="toc rv">
+    <h2>この資料の中身</h2>
+    <ol>
+      <li><a href="#s1">AI社員とは何か（全体像）</a></li>
+      <li><a href="#s2">準備するもの3つ（アカウント登録まで）</a></li>
+      <li><a href="#s3">セットアップ 〜プロンプトを上から順にコピペ〜</a></li>
+      <li><a href="#s4">会社情報の棚卸し 〜任せる仕事をAIに決めさせる〜</a></li>
+      <li><a href="#s5">スキル化 〜任せると決めた仕事を覚えさせる〜</a></li>
+      <li><a href="#s6">オートメーション 〜寝てる間に働かせる〜</a></li>
+      <li><a href="#s7">安全設定 〜これだけは守る〜</a></li>
+      <li><a href="#s8">つまずいたときの対処表</a></li>
+    </ol>
+  </nav>
+
+  <!-- ============ S1 全体像 ============ -->
+  <section class="sec" id="s1">
+    <p class="sec-label rv">STEP 01</p>
+    <h2 class="sec-title rv">AI社員とは何か（全体像）</h2>
+    <p class="sec-lead rv">最初に、これから作るものの正体を1枚で掴みます。</p>
+
+    <div class="card rv">
+      <p>AI社員は、<span class="hl">Discordの中に住んでいて、あなたの代わりに働いてくれるAI</span>です。スマホから話しかけると、家のパソコンの中で実際に手を動かして、仕事を終わらせて報告してきます。</p>
+
+      <figure class="figure">
+        <img src="assets/s1-flow.png" alt="スマホのDiscordから送ったメッセージが、家のパソコンで動くAIに届き、返事が戻ってくる流れの図" width="1600" height="900" loading="lazy">
+        <figcaption>スマホ → Discord → 家のパソコンのAI。外からの一言が、そのまま仕事の指示になります。</figcaption>
+      </figure>
+
+      <h3>普通のAIチャットとの違いは3つ</h3>
+      <div class="grid">
+        <div class="grid-item tilt"><span class="tag">違い 1</span><h4>実際に手を動かす</h4><p>文章で答えるだけでなく、ファイルを開いて、資料を作って、保存するところまでやってくれます。</p></div>
+        <div class="grid-item tilt"><span class="tag">違い 2</span><h4>記憶がある</h4><p>会社のルールも過去の仕事も、全部覚えた状態で動いてくれます。答えが「一般論」で終わりません。</p></div>
+        <div class="grid-item tilt"><span class="tag">違い 3</span><h4>自分から動く</h4><p>決めた時間になったら勝手に仕事をして、なんなら人間を催促してきます。</p></div>
+      </div>
+
+      <h3>できるようになること</h3>
+      <ol class="takeaway">
+        <li><b>スマホから話しかけると働く</b><span>外出先から「今日の台本送って」で、家のパソコンの中を見た答えが返ってきます。</span></li>
+        <li><b>仕事が終わるとAIから報告してくる</b><span>成果物がURLになってスマホに届くので、外出先で確認してそのまま納品まで終わります。</span></li>
+        <li><b>進捗を見てリマインドを送る</b><span>進捗管理シートを読んで、納期漏れがないように担当者へ自動でリマインドします。</span></li>
+        <li><b>寝てる間に仕事をする</b><span>決めた時刻に自分から起動して、結果をDiscordへ届けます（手順4で作ります）。</span></li>
+      </ol>
+
+      <div class="note"><b>難しい定義は不要です：</b>要は「勝手に動いてる」のがAI社員です。この資料では、それをゼロから作ります。</div>
+    </div>
+  </section>
+
+  <!-- ============ S2 準備 ============ -->
+  <section class="sec" id="s2">
+    <p class="sec-label rv">STEP 02</p>
+    <h2 class="sec-title rv">準備するもの3つ（アカウント登録まで）</h2>
+    <p class="sec-lead rv">人間がやるのはここだけ。ほんとにアカウント登録レベルです。</p>
+
+    <div class="card rv">
+      <p>先に言っておくと、<span class="hl">人間がやるのはアカウントの準備だけで、設定は全部AIにやらせます</span>。用意するのは次の3つです。</p>
+
+      <h3>手順</h3>
+      <div class="step">
+        <div class="step-no">1</div>
+        <div class="step-body">
+          <h4>Claudeの有料アカウント</h4>
+          <p>ProかMaxプランを契約します。一番安いProなら月20ドル、日本円だと3,000円ぐらいです（2026年8月時点）。無料プランではこの仕組みは動きません。</p>
+          <a class="toollink" href="https://claude.com/pricing" target="_blank" rel="noopener">Claude 料金ページ</a>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-no">2</div>
+        <div class="step-body">
+          <h4>Claude Codeのデスクトップアプリ</h4>
+          <p>Claude Code（パソコンの上でAIに作業をさせるためのツール）のデスクトップアプリを入れて、Claudeのアカウントでログインしておきます。日本語で指示するだけで使えます。</p>
+          <a class="toollink" href="https://claude.com/claude-code" target="_blank" rel="noopener">Claude Code 公式</a>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-no">3</div>
+        <div class="step-body">
+          <h4>Discordのアカウントと、自分のサーバー</h4>
+          <p>Discord（LINEやSlackと同じ無料のチャットアプリ）を入れてログインし、自分のサーバーを1個作っておきます。サーバーはDiscordの中の「自分の部室」のようなものです。</p>
+          <div class="example">作り方：Discordの左側の「＋」→「オリジナルの作成」→<b>「自分と友達のため」</b>を選ぶと、1人でも作れます。PC版とスマホ版の両方を入れておくと、通知が手元で受け取れます。</div>
+          <a class="toollink" href="https://discord.com/" target="_blank" rel="noopener">Discord 公式</a>
+        </div>
+      </div>
+
+      <div class="note"><b>なんでLINEじゃなくてDiscordなのか：</b>AIをチャットに住まわせる「Bot（ボット）」という仕組みがあるからです。DiscordのBotは無料で審査なしですぐ作れます。LINE公式やSlackだと、無料枠の制限や申請があって最初の一歩が重いんです。</div>
+
+      <p>ここまでできたら、人間の仕事はほぼ終わりです。ここから先の設定は、Claude Codeにプロンプトを貼っていくだけです。</p>
+    </div>
+  </section>
+
+  <!-- ============ S3 セットアップ ============ -->
+  <section class="sec" id="s3">
+    <p class="sec-label rv">STEP 03</p>
+    <h2 class="sec-title rv">セットアップ 〜プロンプトを上から順にコピペ〜</h2>
+    <p class="sec-lead rv">動画で「上から順番にコピペするだけでOK」とお話しした、その現物です。</p>
+
+    <div class="card rv">
+      <h3>先に確認しておくこと</h3>
+      <ul class="check">
+        <li>Claudeの <b>ProまたはMaxプラン</b> を契約している（無料プランでは動きません）</li>
+        <li>claude.aiのアカウントでClaude Codeにログインしている</li>
+        <li>Discordのアカウントと自分のサーバーがある（前の章で作ったもの）</li>
+      </ul>
+      <div class="note">会社のTeamプラン・Enterpriseプランの場合は、管理者が機能をオンにするまで動きません。</div>
+
+      <h3>先に1分半で、流れを掴む</h3>
+      <div class="video">
+        <video src="assets/setup-guide.mp4" controls preload="metadata" playsinline></video>
+      </div>
+      <p class="video-note">▶ セットアップ全体の流れを100秒で解説しています。見てから下のプロンプトを順番に貼ると迷いません。</p>
+      <details class="note"><summary>ナレーション全文を読む</summary>
+        <p>AI社員のセットアップを、はじめから通しで解説します。人間がやるのはアカウントの準備だけ。設定は全部、AIにやらせます。</p>
+        <p>まず、人間が用意するのは3つだけです。Claudeの有料アカウント。Claude Codeのデスクトップアプリ。そして、Discordのアカウントです。</p>
+        <p>Discordでは、自分のサーバーを1個作っておいてください。サーバーは、Discordの中の、自分の部室のようなものです。「自分と友達のため」を選べば、1人でも作れます。</p>
+        <p>ここから先の設定は、Claude Codeにプロンプトを貼っていくだけです。保存版資料に置いてあるプロンプトを、上から順番にコピペしてください。</p>
+        <p>プロンプトを貼ると、AIのほうから質問がきます。OSは何ですか。どのサーバーで動かしますか。チャットで答えていくだけで、Botの作成から接続、動作テストまで、AIが走り切ってくれます。</p>
+        <p>1個だけ注意点があります。途中で出てくる、Botのトークンは、Botを動かすための合いことばで、パスワードと同じものです。人に見せない。画面に映さない。どこにも貼らない。これを徹底してください。</p>
+        <p>最後に、スマホのDiscordを開いて、自分のBotに「ハロー」と送ってみてください。返ってきたら、その瞬間が、あなたのAI社員の誕生です。</p>
+        <p>うまくいかないときは、資料の最後にある「つまずいたときの対処表」を見てください。最初から完璧を目指さなくて大丈夫です。まず70点で作って、使いながら育てていきましょう。</p>
+      </details>
+
+      <h3>プロンプト① Bot作成を、画面操作ごとAIに代行させる</h3>
+      <p>Botを作るときに英語の設定画面（Discord Developer Portal）が出てきますが、動画でお見せした通り、<span class="hl">ここもAIが画面を操作して代わりに進めてくれます</span>。</p>
+      <p>使うには「画面を操作できるAI」が必要です。ClaudeのコンピューターユースかChrome拡張（Claude in Chrome）を有効にして、ブラウザで下のページを開いてログインした状態にしてから、プロンプトを貼ってください。</p>
+      <a class="toollink" href="https://discord.com/developers/applications" target="_blank" rel="noopener">Discord Developer Portal</a>
+      <div class="prompt">
+        <div class="prompt-head">
+          <b>Bot作成を丸ごと代行（1箇所だけ、手順2のBotの名前を書き換えます）</b>
+          <button class="copy" type="button">コピー</button>
+        </div>
+        <pre>あなたはこのPCの画面を見て、マウスとキーボードを操作できるAIです。
+これから Discord Bot の作成を、私の代わりに最後まで進めてください。
+
+【私が先に済ませてあること】
+- ブラウザで https://discord.com/developers/applications を開き、
+  自分のDiscordアカウントでログイン済みの状態にしてあります。
+
+【手順】
+1. スクリーンショットを撮り、Developer Portal が開いていることを確認する。
+   ログイン画面のままだったら、そこで止めて私に知らせる。
+
+2. 右上の「New Application」を押す。名前を聞かれたら
+   「（ここにBotに付けたい名前を書く）」と入力し、規約にチェックして Create を押す。
+
+3. 左メニューの「Bot」を開く。
+
+4. 「PUBLIC BOT」のトグルを OFF にする。
+   （他人が自分のサーバーにこのBotを追加できないようにするため）
+
+5. 下にスクロールし、「Privileged Gateway Intents」の中の
+   「MESSAGE CONTENT INTENT」を ON にする。
+   ここをオンにしないと、Botにはメッセージ本文が空で届く。
+
+6. 画面下に「Save Changes」のバーが出るはずなので、必ず押す。
+   押したことをスクリーンショットで確認するまで次に進まない。
+
+7. 左メニューの「OAuth2」→「URL Generator」を開く。
+   SCOPES で「bot」にチェックを入れる。
+   BOT PERMISSIONS では、次の8つだけにチェックを入れる:
+   View Channels
+   Send Messages
+   Send Messages in Threads
+   Read Message History
+   Attach Files
+   Add Reactions
+   Manage Channels ← Bot自身に部屋を作らせるため
+   Manage Roles ← 同上
+   ※ Administrator は絶対にチェックしない。
+
+8. 一番下の GENERATED URL をコピーし、新しいタブで開く。
+   サーバーを選ぶ画面が出たら、そこで一度止めて
+   「どのサーバーに入れますか」と私に聞く。
+   私が答えたら、そのサーバーを選んで認証を完了させる。
+
+9. Developer Portal の Bot タブに戻り、「Reset Token」を押す。
+   ★トークンが表示されても、絶対に読み上げない。
+   チャットにもファイルにもログにも書き出さない。
+   画面の「Copy」ボタンだけを押してクリップボードに入れ、
+   私には「トークンをクリップボードに入れました」とだけ伝える。
+
+10. 最後に、次の3つを私に報告する:
+   ・Botの名前
+   ・招待したサーバー名
+   ・Message Content Intent が ON になっているか
+
+【絶対にやらないこと】
+- パスワード、2段階認証コード、メールアドレスの入力
+- トークンの値を画面の外へ書き出すこと
+- Administrator 権限を付けること
+- 私に確認せずにサーバーへ招待すること</pre>
+      </div>
+      <div class="note"><b>画面操作AIが使えない場合：</b>このプロンプトは飛ばして大丈夫です。次のプロンプト②のAIが、Bot作成の手順を1つずつ番号つきで案内してくれるので、それに沿って手で作れます（所要が10分から30〜45分に伸びるだけで、出来上がるものは同じです）。</div>
+
+      <h3>プロンプト② 一撃構築 〜接続から動作テストまでAIが走り切る〜</h3>
+      <p>Claude Codeを開いて、下のプロンプトを<span class="hl">そのまま全部コピーして貼るだけ</span>です。書き換える場所はありません。AIのほうから質問がくるので（9個くらい）、チャットで答えていけば、Botとの接続・安全設定・動作テストまで走り切ってくれます。分からない項目は「わからない」と答えて大丈夫です。</p>
+      <div class="prompt">
+        <div class="prompt-head">
+          <b>一撃構築プロンプト（そのまま貼る・書き換え不要）</b>
+          <button class="copy" type="button">コピー</button>
+        </div>
+        <pre>あなたはこれから、私のパソコンで動くAI秘書を構築します。
+
+## 完成イメージ
+
+スマホのDiscordからDMを送ると、このパソコンで動いているあなた（Claude Code）が
+このフォルダの中身を見た状態で返事をする。パソコンを再起動しても勝手に復活する。
+これを作ります。
+
+## 進め方のルール
+
+1. まず下の「ヒアリング」を1回のメッセージでまとめて聞く。1問ずつ聞かない
+2. 私が答えたら、実行計画を5行以内で見せて、私の「OK」をもらってから着手する
+3. 各ステップの終わりに、やったことと結果を1〜2行で報告してから次へ進む
+4. 私が答えられない項目は「わからない」と言うので、その時は推測で埋めずに
+   公式ドキュメントを調べて、根拠つきで提案してほしい
+5. トークンやパスワードの値を、画面にもファイルにもログにも出さないこと
+6. 私のパソコンの設定を変える操作の前には、何をどう変えるかを1行で先に言うこと
+
+## ヒアリング（これを最初に1回で聞く）
+
+1. 使っているOSは何か（macOS / Windows / Linux）
+2. Claudeのプランは何か（Pro / Max / Team / Enterprise / 無料）
+3. Discordのアカウントは持っているか
+4. AI秘書に見せたいフォルダはどこか（絶対パス。分からなければ「今のフォルダ」でよい）
+5. 常駐させたいか、それとも手動で起動する形でよいか
+6. 権限はどこまで許すか（A: 読むだけ / B: 書き込みも許す / C: 迷っている）
+7. 使いたいモデルの希望はあるか（軽さ優先 / 賢さ優先 / おまかせ）
+8. すでにDiscordのボットを持っているか、新しく作るか
+9. このパソコンは普段スリープするか、つけっぱなしか
+
+## 実行手順
+
+### Step 0. 前提の確認（ここで止まる可能性がある。正直に報告すること）
+
+- `claude --version` を実行してバージョンを確認する。v2.1.80未満ならアップデートを案内して止まる
+- `bun --version` を実行する。無ければインストール手順を案内する
+- 認証の状態を確認する。ただし「ログイン済み」の表示は当てにならないので、
+  実際にログインし直すことを勧める判断材料として扱う
+- プランがTeam/Enterpriseの場合、管理者による有効化が必要な旨を伝える
+- 無料プランの場合、この構成は動かない旨を伝えて止まる
+
+**この段階で条件を満たしていない場合、先に進まずに「何が足りないか」を明確に報告すること。**
+
+### Step 1. Discord側の設定を案内する
+
+私が手で操作する部分なので、順番に番号をつけて指示してほしい。
+特に、**メッセージの中身を読む設定（Message Content Intent）をオンにする**ことを
+強調して伝えること。ここを忘れると、メッセージは届くのに中身が空になる。
+
+ボットに必要な権限も、チェックすべき項目名をそのまま列挙すること。
+
+### Step 2. プラグインを導入する
+
+公式のDiscordチャンネルプラグインを入れる。
+インストール範囲は「ユーザー範囲」を選ぶよう案内する（どのフォルダでも使えるようにするため）。
+
+マーケットプレイスが見つからないエラーが出た場合の対処も先回りして案内すること。
+
+### Step 3. トークンを設定する
+
+公式のコマンドを使って設定する。
+**トークンの値は絶対に画面に出さない。** 私が貼った値をそのまま復唱しないこと。
+
+### Step 4. 許可リストを閉じる（ここは飛ばさない）
+
+ペアリングをして、その直後に必ず許可リストの方針を「許可した人だけ」に変更する。
+
+**ここを飛ばすと、他人が私のパソコンのAIに命令できる状態になる。**
+設定後、実際に設定ファイルを読んで、許可リストが自分1人だけになっていることを確認して報告すること。
+
+### Step 5. 常駐させる（Step 0で「常駐したい」と答えた場合のみ）
+
+以下の3段構えで作る。
+
+**5-1. 本物のターミナルの中で動かす**
+Claude Codeの対話モードは、本物のターミナル（pty）がないと起動せず、
+1回きりの実行モードに落ちて即終了する。
+そのため出力をログファイルにリダイレクトしてはいけない。
+tmux（またはOSに応じた同等の仕組み）を使ってptyを用意すること。
+
+**5-2. 見張り役を置く**
+15秒ごとに本体が生きているか確認し、消えていたら作り直すスクリプトを作る。
+
+注意: セッション名の判定は**完全一致**にすること。
+前方一致にすると、見張り役自身の名前にマッチして「生きている」と誤判定する。
+
+さらに、起動画面を定期的に読んで、
+認証切れを示すメッセージ（ログインを促す表示、トークンの期限切れ、認証エラー）を
+検知したらDiscordに通知する処理を入れること。
+
+**この通知は、ボットのトークンで直接Discord APIを叩いて送ること。**
+Claude側の認証が死んでいる時に通知するのが目的なので、
+「AIに通知させる」設計にしてはいけない。
+
+**5-3. パソコン起動時に自動で立ち上げる**
+OSに応じた自動起動の仕組みに登録する。
+登録コマンドが私の設定で禁止されている場合は、私が手で1回実行する形に切り替えて、
+そのコマンドをそのまま提示すること。
+
+**5-4. 見張り役の多重起動対策**
+見張り役が2つ以上動いた場合、後から起動した方は「控え」として待機し、
+先に動いている方が死んだら自動で昇格する形にすること。
+2つが同時に本体を作り直して、無駄な再起動を繰り返す事故を防ぐため。
+
+### Step 6. 会話を継続させる
+
+会話のIDを1回だけ発行してファイルに保存し、起動のたびにそのIDで再開する形にする。
+これをしないと、再起動のたびに会話がゼロからになる。
+
+リセットしたい時の手順も、最後にまとめて教えること。
+
+### Step 7. 権限を絞る
+
+Step 0の回答に応じて設定する。
+「迷っている」と答えた場合は、**読み取り専用を強く推奨すること。**
+
+理由も添えること: 外から届いたメッセージをそのままセッションに流し込む仕組みなので、
+権限を絞っておくと、最悪のケースでも被害の上限が決まる。
+
+また、無人で動く常駐では「確認ダイアログで固まる」ことが事実上の停止と同じになるため、
+確認が出ないモードを選ぶこと自体が設計条件になる、という点も説明すること。
+
+### Step 8. 壊して確かめる（ここまでやって完了）
+
+「たぶん動く」で終わらせない。以下を実際に実行して、結果を表で報告すること。
+
+- 本体をわざと終了させて、再起動するか
+- セッションを強制的に消して、見張り役が作り直すか
+- 見張り役を2つ起動して、本体が増殖しないか
+- 本番の見張り役を終了させて、控えが昇格するか（本体は止まらないこと）
+- 実際にDiscordからDMを送って、セッションに到達するか
+
+**通らなかった項目は「通らなかった」とそのまま書くこと。** 成功したことにしない。
+
+### Step 9. 状態確認コマンドを用意する
+
+私が困った時に1つ打てば全部分かるスクリプトを作る。
+以下を1画面で表示すること。
+
+- 見張り役が動いているか
+- 本体が動いているか
+- Discordとの接続が生きているか
+- 自動起動が登録されているか
+- 直近のログの最後の数行
+- 認証が切れていないか
+
+**表示は日本語で、記号（OK / NG）で一目で分かる形にすること。**
+
+### Step 10. 引き継ぎメモを書く
+
+作ったものの一覧、使い方、止め方、再開の仕方、困った時の対処を
+1つのMarkdownファイルにまとめる。
+
+3ヶ月後の私が読んで分かる粒度で書くこと。
+
+## 絶対にやらないこと
+
+- トークン・パスワード・認証情報の値を画面やログやファイル本文に出す
+- 許可リストを開いたまま（誰でもDMできる状態で）完了とする
+- 出力をログファイルにリダイレクトする（Claude Codeが即終了する）
+- セッション名の判定を前方一致にする
+- 検証していないことを「動きました」と報告する
+- 私の全セッションの既定設定を、私に断らずに変更する
+- 私に同じことを2回聞く
+
+## 完了条件
+
+以下が全部埋まって初めて「完了」と報告すること。
+
+- [ ] 前提（プラン・バージョン・Bun・認証）を実際に確認した
+- [ ] Discordのボットが自分のサーバーにいる
+- [ ] 許可リストが自分1人だけになっていることを、ファイルを読んで確認した
+- [ ] 権限モードを設定した
+- [ ] （常駐する場合）3段構えが動いていて、壊して確かめた結果を表で報告した
+- [ ] 会話が継続する設定になっている
+- [ ] 状態確認コマンドが動く
+- [ ] 引き継ぎメモを書いた
+- [ ] 実際にDiscordからDMを送って、返事が返ってきた</pre>
+      </div>
+
+      <h3>動作確認 〜AI社員の誕生〜</h3>
+      <div class="step">
+        <div class="step-no">1</div>
+        <div class="step-body">
+          <h4>スマホのDiscordを開いて、自分のBotに「ハロー」と送る</h4>
+          <p>返ってきたら、その瞬間があなたのAI社員の誕生です。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-no">2</div>
+        <div class="step-body">
+          <h4>通知用の部屋づくりもBotに任せる</h4>
+          <p>報告が届くチャンネル（Discordの中の部屋）も、人間が作る必要はありません。できあがったAI社員に「通知用のチャンネルを作って、テスト投稿までして」と頼めば、自分で部屋を作ってくれます。</p>
+        </div>
+      </div>
+
+      <div class="note warn"><b>1個だけ注意 — Botの「トークン」：</b>途中で出てくるトークン（Botを動かすための合いことば。パスワードと同じもの）は、絶対に人に見せてはいけない値です。<b>人に見せない・画面に映さない・どこにも貼らない</b>。これを徹底してください。上のプロンプトには、値を画面に出さずに扱うルールが組み込んであります。もし漏れたかもと思ったら、Developer Portalの設定画面からリセットすれば古い合いことばは使えなくなります。</div>
+    </div>
+  </section>
+
+  <!-- ============ S4 棚卸し ============ -->
+  <section class="sec" id="s4">
+    <p class="sec-label rv">STEP 04</p>
+    <h2 class="sec-title rv">会社情報の棚卸し 〜任せる仕事をAIに決めさせる〜</h2>
+    <p class="sec-lead rv">いまのAI社員は入社したばかりの新入社員。何を任せるかも、AIに決めさせます。</p>
+
+    <div class="card rv">
+      <p>次にやるのは「何の仕事を任せるか決めること」と「その仕事に必要な会社の情報を渡すこと」の2つです。これも自分ではやりません。AI社員にこう頼みます。</p>
+
+      <div class="prompt">
+        <div class="prompt-head">
+          <b>業務の棚卸しを任せる</b>
+          <button class="copy" type="button">コピー</button>
+        </div>
+        <pre>私の業務内容をヒアリングして、AI社員に任せられる業務と、私にしかできない業務に仕分けてください。</pre>
+      </div>
+
+      <p>AIのほうから「どんな事業をしていますか」「毎日やっている作業は何ですか」のように質問がくるので、チャットで答えていくだけで仕事の一覧表ができあがります。</p>
+
+      <h3>仕分けのイメージ</h3>
+      <div class="grid">
+        <div class="grid-item tilt"><span class="tag">AIに任せる</span><h4>リサーチ・資料作り・進捗管理</h4><p>毎回同じ形でやる仕事、情報を集めてまとめる仕事はAI向きです。</p></div>
+        <div class="grid-item tilt"><span class="tag">人間に残す</span><h4>お客さんと直接話す仕事</h4><p>商談・撮影のような、生身の自分がいる仕事は人間の担当です。</p></div>
+      </div>
+
+      <h3>任せる仕事が決まったら、必要な情報をAIに聞く</h3>
+      <div class="prompt">
+        <div class="prompt-head">
+          <b>必要な情報をAIに指定させる</b>
+          <button class="copy" type="button">コピー</button>
+        </div>
+        <pre>この仕事をAI社員に任せるのに、必要な情報は何ですか？　私が用意すべきものをリストで教えてください。</pre>
+      </div>
+      <p>商品の情報、過去の発信など、必要なものをAIが指定してくるので、あとはそれを<span class="hl">Claude Codeに見せているフォルダに入れていくだけ</span>です。</p>
+      <p>この情報がない状態だと、AIの答えは一般論ばかりになります。情報が入っていると、自分の事業に合わせて動いてくれるようになります。新入社員に会社の情報を教えて、即戦力にするようなものです。</p>
+
+      <div class="note"><b>最初は誰が作っても頼りないです：</b>そこから情報とルールを足していって、使いながら育てていく感じです。会社のルールを書いておく「ルールファイル」も、「ルールファイルを作って」とAIに頼めば作ってくれます。</div>
+    </div>
+  </section>
+
+  <!-- ============ S5 スキル化 ============ -->
+  <section class="sec" id="s5">
+    <p class="sec-label rv">STEP 05</p>
+    <h2 class="sec-title rv">スキル化 〜任せると決めた仕事を覚えさせる〜</h2>
+    <p class="sec-lead rv">スキルはAIに覚えさせる作業の手順書。でも、手順書は書きません。</p>
+
+    <div class="card rv">
+      <p>スキル（AIに覚えさせる作業の手順書のようなもの）を一度入れておくと、毎回説明しなくても同じ品質で動いてくれます。作り方は、手順書を書くのではなく<span class="hl">「一度一緒にやって、覚えさせる」</span>です。</p>
+
+      <h3>手順</h3>
+      <div class="step">
+        <div class="step-no">1</div>
+        <div class="step-body">
+          <h4>任せると決めた仕事を、まず一度普通に頼む</h4>
+          <div class="example">例：「今週Xに投稿されたAI系の解説記事で、インプレッションが多い順でTOP5をリサーチして」</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-no">2</div>
+        <div class="step-body">
+          <h4>出てきたものに直しを入れる</h4>
+          <div class="example">例：「発信者アカウントのフォロワー数とか、記事の保存数も知りたい」</div>
+          <p>いい感じになるまで、チャットで普通に直しを頼みます。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-no">3</div>
+        <div class="step-body">
+          <h4>いい感じになったら、このプロンプトを入力する</h4>
+        </div>
+      </div>
+
+      <div class="prompt">
+        <div class="prompt-head">
+          <b>やり取りごとスキル化する</b>
+          <button class="copy" type="button">コピー</button>
+        </div>
+        <pre>これまでのやり取りを全部参照して、このタスクをスキル化してください。</pre>
+      </div>
+
+      <p>これだけです。「スキルクリエイター」という<b>スキルを作るためのスキル</b>がClaude Codeのデスクトップアプリに最初から入っているので、書き方を覚える必要はありません。</p>
+      <p>次からは<span class="hl">「いつものリサーチやって」の一言</span>で、さっき直したところまで含めて、同じ品質で仕上げてくれます。</p>
+
+      <h3>仕上げ 〜報告をスマホに届かせる〜</h3>
+      <p>スキルの最後に「結果をDiscordに送る」を入れておくと、その仕事が終わるたびにスマホへ報告が飛んでくるようになります。動画でお見せした、進捗管理シートを見てリマインドを送ってくる仕組みも、実はこの形でスキルとして覚えさせてあります。</p>
+
+      <div class="note"><b>この仕組みの核心：</b>Botが1体通っていれば、Discordの中身をAIが読むことも、AIに喋らせることもできます。Claudeに言ってスキルを作って、そのスキルでDiscordを動かしていく。僕の会社の仕組みは、全部この形です。</div>
+    </div>
+  </section>
+
+  <!-- ============ S6 オートメーション ============ -->
+  <section class="sec" id="s6">
+    <p class="sec-label rv">STEP 06</p>
+    <h2 class="sec-title rv">オートメーション 〜寝てる間に働かせる〜</h2>
+    <p class="sec-lead rv">ここまでのAI社員は「話しかけたら動く」状態。最後に「話しかけなくても動く」ようにします。</p>
+
+    <div class="card rv">
+      <p>やり方は簡単で、AI社員にこう頼むだけです。オートメーション（時間が来たらAIが勝手に動く仕組み）の登録から、その場でのテスト実行まで、AIが確認してくれます。</p>
+
+      <div class="prompt">
+        <div class="prompt-head">
+          <b>定時実行を頼む（内容は自分の仕事に合わせて変えてOK）</b>
+          <button class="copy" type="button">コピー</button>
+        </div>
+        <pre>毎朝8時に、今日やることリストをまとめてDiscordに送ってください。
+
+登録したら、時刻を待たずに「今すぐ1回だけ手動実行」して、
+実際にDiscordに届くところまで確認してください。
+届かなければ原因を切り分けて直してください。
+最後に、次回いつ実行されるかを教えてください。</pre>
+      </div>
+
+      <div class="note"><b>ポイントは「その場で1回テスト実行」：</b>登録して終わりにすると、翌朝に何も来なくて原因が分からなくなります。必ずその場で1回動かして、実際に届くところまで確認させてください。</div>
+
+      <p>朝8時出勤にしたら、絶対に8時に出勤してくれる社員です。他にも、毎晩その日のDiscordのやり取りをまとめて進捗レポートを送らせることもできます。</p>
+
+      <h3>パソコン側の条件</h3>
+      <ol class="takeaway">
+        <li><b>電源が切れてたら動きません。スリープでも動きません</b><span>この仕組みは自分のパソコンで動いているためです。</span></li>
+        <li><b>スリープしない設定にすれば、ノンストップで動き続けます</b><span>電気代は月100円とか200円なので、人件費としては優秀すぎます。</span></li>
+        <li><b>パソコンは1台で大丈夫です</b><span>スリープしない設定にして家に置いて出れば、外からスマホで話しかけられます。この用途は性能をほとんど使わないので、昔の古いパソコンでも十分です。常駐用に新しく買うのは、最初にやることではありません。</span></li>
+      </ol>
+
+      <figure class="figure">
+        <img src="assets/s6-stack.png" alt="常駐を支える3段構え（本物のターミナル・見張り役・自動起動）の図" width="1600" height="900" loading="lazy">
+        <figcaption>常駐は「落ちても勝手に生き返る」3段構えで支えます。セットアップのプロンプト②が、この形まで組んでくれます。</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============ S7 安全設定 ============ -->
+  <section class="sec" id="s7">
+    <p class="sec-label rv">STEP 07</p>
+    <h2 class="sec-title rv">安全設定 〜これだけは守る〜</h2>
+    <p class="sec-lead rv">便利な反面、頼んでもいない業務を勝手にやられたら怖い。だから守り方を決めておきます。</p>
+
+    <div class="card rv">
+      <figure class="figure">
+        <img src="assets/s7-gate.png" alt="許可リストと権限の絞り込みで、外からの入口を守る図" width="1600" height="900" loading="lazy">
+        <figcaption>入口（誰が話しかけられるか）と権限（AIに何を許すか）の2箇所で守ります。</figcaption>
+      </figure>
+
+      <ol class="takeaway">
+        <li><b>話しかけられる人を自分だけにする</b><span>許可リスト（話しかけられる人を絞る設定）を入れておくと、登録した人以外のメッセージは返事もせずに全部無視してくれます。セットアップのプロンプト②に組み込み済みです。</span></li>
+        <li><b>AIに許す権限を絞る。最初は「読み取り専用」がおすすめ</b><span>読むことは全部できて、消したり送ったりはできない状態にしておけば、最悪のことが起きても読まれるだけで済みます。</span></li>
+        <li><b>勝手に送らせない</b><span>送る前に必ず確認してくる形にします。リマインドのような自動送信には、深夜には送らない・同じ催促は2日空ける、といったブレーキを入れます。</span></li>
+        <li><b>お金の話と人の話はAIに決めさせない</b><span>契約・単価のような話は人間の仕事として残します。</span></li>
+        <li><b>パスワード系の値は画面に出さない</b><span>トークンやAPIキー（外部サービスを使うための鍵）のような値は、AIとの画面にも出さないルールにしておくと安全です。また、入れた会社の情報をAIの学習に使うかどうかは、Claudeの設定（モデルの改善に使うかどうかの項目）で選べます。気になる方はオフにしておいてください。</span></li>
+      </ol>
+
+      <div class="note"><b>考え方：</b>リスクはゼロにはなりません。リスクをゼロにするのではなく、<b>攻撃が成立しても被害が出ない形にしておく</b>。これが自動化の考え方です。</div>
+    </div>
+  </section>
+
+  <!-- ============ S8 対処表 ============ -->
+  <section class="sec" id="s8">
+    <p class="sec-label rv">STEP 08</p>
+    <h2 class="sec-title rv">つまずいたときの対処表</h2>
+    <p class="sec-lead rv">先に知っておくと早いです。困ったらここに戻ってきてください。</p>
+
+    <div class="card rv">
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>症状</th><th>原因</th><th>対処</th></tr></thead>
+          <tbody>
+            <tr><td>メッセージは届くのに中身が空</td><td>Message Content Intentがオフ</td><td>Discord Developer Portalでオンにする</td></tr>
+            <tr><td>Botが何も返事しない</td><td>Claude Codeがチャンネル有効の状態で起動していない</td><td>チャンネルを有効にして起動し直す</td></tr>
+            <tr><td>起動した瞬間に終了する</td><td>出力をログファイルにリダイレクトしている</td><td>リダイレクトをやめて、本物のターミナルの中で動かす</td></tr>
+            <tr><td>見張り役が本体を作り直さない</td><td>セッション名の判定が前方一致</td><td>完全一致にする</td></tr>
+            <tr><td>「入力中…」のまま返事が来ない</td><td>claudeコマンドの認証切れ</td><td>ターミナルで1回ログインし直す</td></tr>
+            <tr><td>毎回「はじめまして」から始まる</td><td>会話のIDが固定されていない</td><td>IDを発行して保存し、起動時に再開させる</td></tr>
+            <tr><td>外出中に返事が来ない</td><td>パソコンがスリープしている</td><td>スリープしない設定にする</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>今日やることチェックリスト</h3>
+      <ul class="check">
+        <li>Claudeの有料アカウント・Claude Codeデスクトップアプリ・Discordのアカウントを用意する</li>
+        <li>Discordに自分のサーバー（部室）を1個作る</li>
+        <li>セットアップのプロンプトを上から順に貼って、AIに設定を任せる</li>
+        <li>スマホから「ハロー」と送って、返事が来ることを確認する</li>
+        <li>棚卸しプロンプトで、AIに任せる仕事を1つ決める</li>
+      </ul>
+
+      <div class="note"><b>最初から完璧を目指さなくていいです：</b>まず70点で作って、使いながら足りないところを足していくほうが早いです。今日、Botを1体作るところから始めてみてください。</div>
+    </div>
+  </section>
+
+  <!-- ============ 締めCTA ============ -->
+  <section class="closing rv">
+    <div class="closing-inner">
+      <h2>AI社員と一緒に、次の一歩へ</h2>
+      <p>この資料の手順で、あなたのAI社員はもう働きはじめられます。さらに深く学びたい方へ、公式LINEから参加できる「AI×SNS攻略 月額0円コミュニティ」（LINEオープンチャット）をご用意しています。追加12大特典に加えて、最新のAI×マーケティング情報を僕がキャッチアップして配信しています。</p>
+      <p>コミュニティでは、累計3,000名以上が参加した『AI駆動型コンテンツビジネス 0→100完全攻略セミナー』にも完全無料でご招待しています。参加で豪華20大特典がもらえてしまうので、ぜひこちらもご活用ください。</p>
+
+      <div class="bonus">
+        <div><b>10大特典</b><span>公式LINE（受け取り済み）</span></div>
+        <div><b>追加12大特典</b><span>AI×SNS攻略 月額0円コミュニティ</span></div>
+        <div><b>20大特典</b><span>0→100完全攻略セミナー</span></div>
+      </div>
+
+      <a class="btn" href="https://utage-system.com/line/open/ttS3H5oAa7lk?mtid=gb3g3fVXON1c" target="_blank" rel="noopener">月額0円コミュニティの案内を受け取る</a>
+      <p style="margin-top:14px;font-size:13px;opacity:.8">※ オープンチャットへの参加案内は、公式LINEのトークに届きます。</p>
+    </div>
+  </section>
+
+  <p class="foot">星川ユウヤ</p>
+</div>
+
+<button class="totop" id="totop" type="button" aria-label="ページ上部へ戻る">↑</button>
+
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* [C:進捗バー] + [C:トップへ戻る] */
+  var bar = document.getElementById('bar');
+  var totop = document.getElementById('totop');
+  function onScroll(){
+    var h = document.documentElement;
+    var max = h.scrollHeight - h.clientHeight;
+    var p = max > 0 ? (h.scrollTop / max) * 100 : 0;
+    if (bar) bar.style.width = p + '%';
+    if (totop) totop.classList.toggle('show', h.scrollTop > 640);
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+  if (totop) totop.addEventListener('click', function(){
+    window.scrollTo({top:0, behavior: reduce ? 'auto' : 'smooth'});
+  });
+
+  /* [C:出現アニメーション] 画面に入ったらふわっと表示 */
+  var rv = document.querySelectorAll('.rv');
+  if ('IntersectionObserver' in window && !reduce){
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, {rootMargin:'0px 0px -12% 0px', threshold:0.08});
+    rv.forEach(function(el){ io.observe(el); });
+  } else {
+    rv.forEach(function(el){ el.classList.add('in'); });
+  }
+
+  /* [C:目次] + [C:サイド進捗ナビ] 現在地ハイライト */
+  var secs = Array.prototype.slice.call(document.querySelectorAll('section.sec[id]'));
+  var tocLinks = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('.sidenav a'));
+  if (secs.length && 'IntersectionObserver' in window){
+    var spy = new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(!e.isIntersecting) return;
+        var id = '#' + e.target.id;
+        tocLinks.forEach(function(a){ a.classList.toggle('active', a.getAttribute('href') === id); });
+        navLinks.forEach(function(a){ a.classList.toggle('active', a.getAttribute('href') === id); });
+      });
+    }, {rootMargin:'-45% 0px -45% 0px'});
+    secs.forEach(function(s){ spy.observe(s); });
+  }
+
+  /* [C:プロンプト枠] コピーボタン */
+  document.querySelectorAll('.prompt .copy').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var pre = btn.closest('.prompt').querySelector('pre');
+      if(!pre) return;
+      var text = pre.innerText;
+      var done = function(){
+        var old = btn.textContent;
+        btn.textContent = 'コピーしました';
+        btn.classList.add('done');
+        setTimeout(function(){ btn.textContent = old; btn.classList.remove('done'); }, 1600);
+      };
+      if (navigator.clipboard && window.isSecureContext){
+        navigator.clipboard.writeText(text).then(done, fallback);
+      } else { fallback(); }
+      function fallback(){
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.setAttribute('readonly','');
+        ta.style.position='fixed'; ta.style.opacity='0';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); done(); } catch(e){}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+
+  if (reduce) return;
+
+  /* [C:ヒーロー] マウス追従の光。触っていない時は中央 */
+  var hero = document.getElementById('hero');
+  var glow = document.getElementById('glow');
+  if (hero && glow){
+    hero.addEventListener('pointermove', function(ev){
+      var r = hero.getBoundingClientRect();
+      glow.style.setProperty('--mx', ((ev.clientX - r.left) / r.width * 100) + '%');
+      glow.style.setProperty('--my', ((ev.clientY - r.top) / r.height * 100) + '%');
+    });
+  }
+
+  /* [C:3Dホバーカード] 指で触る端末では無効（横スクロールを出さないため） */
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches){
+    document.querySelectorAll('.tilt').forEach(function(el){
+      el.addEventListener('pointermove', function(ev){
+        var r = el.getBoundingClientRect();
+        var rx = ((ev.clientY - r.top) / r.height - .5) * -5;
+        var ry = ((ev.clientX - r.left) / r.width - .5) * 5;
+        el.style.transform = 'perspective(760px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) translateY(-3px)';
+      });
+      el.addEventListener('pointerleave', function(){ el.style.transform = ''; });
+    });
+  }
+})();
+</script>
+</body>
+</html>
